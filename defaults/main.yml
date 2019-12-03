@@ -1,0 +1,7 @@
+# -*- coding: utf-8 -*-
+# default vars for  ansible-role-osquery
+---
+# Suggested ansible variable namespace: behance__oh__my__bossjones__osquery___
+
+bossjones__osquery__path_to_osquery_config:
+  - { user: "vagrant", dir: "/home/vagrant" }
