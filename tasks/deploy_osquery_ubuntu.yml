@@ -40,8 +40,8 @@
 
 - name: Copy OSQuery crt
   template:
-    src: conf/agents/osquery.crt
-    dest: /etc/osquery/osquery.crt
+    src: conf/agents/certificate.crt
+    dest: /etc/osquery/certificate.crt
     owner: root
     group: root
     mode: '0600'
