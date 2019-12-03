@@ -40,6 +40,14 @@
     group: root
     mode: '0600'
 
+- name: Copy OSQuery crt
+  template:
+    src: conf/agents/osquery.crt
+    dest: /etc/osquery/osquery.crt
+    owner: root
+    group: root
+    mode: '0600'
+
 - name: Enable OSQuery service
   service:
     name: osqueryd
