@@ -17,7 +17,7 @@
 - name: Install OSQuery
   package:
     name: osquery
-    state: installed
+    state: present
 
 - name: Get cert for Kolide
   shell: python3 -c "import ssl; print (ssl.get_server_certificate(('{{ fleet_hostname }}.{{ base_domain }}', 443)))" | sudo tee /etc/osquery/certificate.crt
