@@ -63,10 +63,10 @@
         # Restart service and ensure it is enabled
         - name: start and enable osquery
           become: yes
-          service: name=osquery state=restarted enabled=yes
+          service: name=osqueryd state=restarted enabled=yes
       rescue:
         - name: encrypt all secret vars
-          shell: "journalctl --no-pager --since today -u osquery.service"
+          shell: "journalctl --no-pager --since today -u osqueryd.service"
           ignore_errors: yes
           changed_when: false
           failed_when: false
@@ -77,7 +77,7 @@
             var: journalctl_result.stdout
       always:
         - name: encrypt all secret vars
-          shell: "journalctl --no-pager --since today -u osquery.service"
+          shell: "journalctl --no-pager --since today -u osqueryd.service"
           ignore_errors: yes
           changed_when: false
           failed_when: false
