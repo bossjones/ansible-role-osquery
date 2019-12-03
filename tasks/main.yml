@@ -3,3 +3,11 @@
 ---
 - name: init
   include: init.yml
+
+- name: deploy_osquery_centos
+  include: deploy_osquery_centos.yml
+  when: ansible_distribution == "CentOS"
+
+- name: deploy_osquery_ubuntu
+  include: deploy_osquery_ubuntu.yml
+  when: ansible_distribution == "Ubuntu"
