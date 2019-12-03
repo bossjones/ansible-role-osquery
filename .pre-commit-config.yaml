@@ -33,23 +33,11 @@ repos:
         files: \.(yaml|yml)$
         types: [file, yaml]
         entry: yamllint --strict
-  - repo: https://github.com/ansible/ansible-lint.git
-    rev: v4.1.0
+  - repo: local
     hooks:
-      - id: ansible-lint
-        files: \.(yaml|yml)$
-        entry: ansible-lint
-        language_version: python3
-        args: [
-          "--exclude=roles",
-          "--exclude=basic/roles",
-          "--exclude=.travis.yml"
-        ]
-  -   repo: local
-      hooks:
-      -   id: ansible-check-unencrypted-vault
-          name: Check variables directory for unencrypted vault secrets
-          description: This hook ensures that we never commit secrets to github
-          entry: contrib/ansible_unencrypted_vault_checker.py
-          language: script
-          files: ^vars/secret/.*\.vault$
+      - id: ansible-check-unencrypted-vault
+        name: Check variables directory for unencrypted vault secrets
+        description: This hook ensures that we never commit secrets to github
+        entry: contrib/ansible_unencrypted_vault_checker.py
+        language: script
+        files: ^vars/secret/.*\.vault$

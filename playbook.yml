@@ -1,10 +1,102 @@
+# -*- coding: utf-8 -*-
+# USAGE(dev public): ansible-playbook -v ansible/playbooks/tools/monkeypatch_osquery.yml -i ansible/inventory/inventory-dev-private/ --extra-vars "cluster=mantra_testapp_etcd tier=dev" -f 1000
+
 ---
-# sudo ansible-playbook -i "localhost," -c local playbook.yml
-# sudo ansible-playbook -i "localhost," -c local playbook.yml --extra-vars="bossjones__osquery__user=$(whoami)"
-# sudo ansible-playbook --ask-become-pass --check -i "localhost," -c local playbook.yml --extra-vars="bossjones__osquery__user=$(whoami)"
-- hosts: localhost
+##############################################################################
+# file: monkeypatch_osquery.yml
+# install osquery
+#
+# Run with:
+#
+# Dynamic Inventory
+# USAGE: ansible-playbook -v ansible/playbooks/tools/monkeypatch_osquery.yml -i ansible/inventory/inventory-dev-private/ --extra-vars "cluster=mantra_testapp_etcd tier=dev" -f 1000
+# NOTE: need to set environment variables before running! (prod, stage, prod)
+# Example: source ~/.aws/prod.sh
+#
+# Expected enviroment variables:
+# export AWS_ACCESS_KEY_ID
+# export AWS_SECRET_ACCESS_KEY
+# export AWS_DEFAULT_REGION="us-east-1"
+#
+##############################################################################
+
+- name: Vault | Decrypt secrets
+  hosts: localhost
   connection: local
+  environment:
+    ANSIBLE_VAULT_PASSWORD_FILE: ~/.vault_password_personal.txt
+  pre_tasks:
+    - name: decrypt all secret vars
+      shell: "ansible-vault decrypt {{item}}"
+      ignore_errors: yes
+      changed_when: false
+      failed_when: false
+      with_fileglob:
+        - "vars/secret/*"
+
+- name: Converge osquery
+  hosts: localhost
+  connection: local
+  gather_facts: True
   become: true
+  strategy: free
+  pre_tasks:
+    - ping:
+    - name: dynamically include vars directory (recursively)
+      include_vars:
+        dir: "vars/secret"
+        ignore_unknown_extensions: True
+        extensions: ['', 'yaml', 'yml', 'json', 'vault']
+      no_log: True
   roles:
     - ../ansible-role-osquery
 
+
+  post_tasks:
+    # Now that everything has been re-run w/ cluster specific values, lets go ahead and enable everything we care about
+    - name: reload systemd configuration
+      become: yes
+      command: systemctl daemon-reload
+
+    - name: Handle errors for osquery
+      block:
+        # Restart service and ensure it is enabled
+        - name: start and enable osquery
+          become: yes
+          service: name=osquery state=restarted enabled=yes
+      rescue:
+        - name: encrypt all secret vars
+          shell: "journalctl --no-pager --since today -u osquery.service"
+          ignore_errors: yes
+          changed_when: false
+          failed_when: false
+          register: journalctl_result
+
+        - name: Debug | journalctl dump
+          debug:
+            var: journalctl_result.stdout
+      always:
+        - name: encrypt all secret vars
+          shell: "journalctl --no-pager --since today -u osquery.service"
+          ignore_errors: yes
+          changed_when: false
+          failed_when: false
+          register: journalctl_result
+
+        - name: Debug | journalctl dump
+          debug:
+            var: journalctl_result.stdout
+
+- name: Prepare | re encrypt values
+  hosts: localhost
+  connection: local
+  environment:
+    ANSIBLE_VAULT_PASSWORD_FILE: ~/.vault_password_personal.txt
+  pre_tasks:
+    - name: encrypt all secret vars
+      shell: "ansible-vault encrypt {{item}}"
+      ignore_errors: yes
+      changed_when: false
+      failed_when: false
+      with_fileglob:
+        - "vars/secret/*"

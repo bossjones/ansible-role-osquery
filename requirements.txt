@@ -6,7 +6,6 @@
 #
 ansible==2.7.14
 awscli==1.16.280
-backports.ssl-match-hostname==3.7.0.1  # via docker
 bcrypt==3.1.7             # via paramiko
 boto3==1.10.16
 botocore==1.13.16
@@ -17,10 +16,7 @@ colorama==0.4.1           # via awscli
 cryptography==2.8         # via ansible, paramiko
 docker==4.1.0
 docutils==0.15.2          # via awscli, botocore
-enum34==1.1.6             # via cryptography
-futures==3.3.0            # via s3transfer
 idna==2.8                 # via requests
-ipaddress==1.0.23         # via cryptography, docker
 jinja2-cli[yaml]==0.7.0
 jinja2==2.10.3            # via ansible, jinja2-cli
 jmespath==0.9.4           # via boto3, botocore
@@ -42,4 +38,4 @@ websocket-client==0.56.0  # via docker
 wget==3.2
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==41.6.0        # via ansible
+# setuptools
